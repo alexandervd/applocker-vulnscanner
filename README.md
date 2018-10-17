@@ -1,2 +1,2 @@
-# pentest-powershell
-Repository with basic attack tools written out of curiosity
+# applocker-vulnscanner
+Tool written to scan for flaws in your applocker policy
