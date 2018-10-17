@@ -1,3 +1,6 @@
+# Script that scans the applocker policy for flawed path rules
+# Authors: Alexander Van Daele, Simon Bockaert
+
 function Can-Create-Subfile{
     param([string]$path = "")
     $success = $false
@@ -42,11 +45,11 @@ function Can-Create-Directory{
 
 function Can-Write-File{
     param([string]$path = "")
-    Try { 
+    Try {
         [io.file]::OpenWrite($path).close()
         return $true
     }
-    Catch { 
+    Catch {
         return $false
     }
 }
@@ -120,6 +123,8 @@ function Check-Applockerpath{
     return $results
 }
 
+# Get Applocker Paths Policy
+Write-Host "Checking path rules..."
 $nodes = Get-AppLockerPolicy -Effective -Xml | Select-Xml -XPath "//AppLockerPolicy/RuleCollection/FilePathRule/Conditions/FilePathCondition"
 $all = $nodes | ForEach-Object {$tmp = $_.Node.Path -replace "%OSDRIVE%",$env:SystemDrive; [System.Environment]::ExpandEnvironmentVariables($tmp)}
 
