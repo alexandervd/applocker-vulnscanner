@@ -6,6 +6,27 @@
     Optional Dependencies: None
 #>
 
+function Can-Write-File {
+    <#
+    .SYNOPSIS
+    Writes customized output to a host.
+    .DESCRIPTION
+    The Write-Host cmdlet customizes output. You can specify the color of text by using
+    the ForegroundColor parameter, and you can specify the background color by using the
+    BackgroundColor parameter. The Separator parameter lets you specify a string to use to
+    separate displayed objects. The particular result depends on the program that is
+    hosting Windows PowerShell.
+    #>
+    param([string]$path = "")
+    Try {
+        [io.file]::OpenWrite($path).close()
+        return $true
+    }
+    Catch {
+        return $false
+    }
+}
+
 function Check-ApplockerFolder {
     <#
     .SYNOPSIS
@@ -17,6 +38,7 @@ function Check-ApplockerFolder {
     separate displayed objects. The particular result depends on the program that is
     hosting Windows PowerShell.
     #>
+    param([string]$path = ".")
 }
 
 function Check-ApplockerFile {
@@ -30,6 +52,7 @@ function Check-ApplockerFile {
     separate displayed objects. The particular result depends on the program that is
     hosting Windows PowerShell.
     #>
+    param([string]$path = ".")
 }
 
 function Check-ApplockerPath {
@@ -52,9 +75,14 @@ function Get-ApplockerPaths {
     .DESCRIPTION
     Returns the paths parsed from the path rules in Applocker.
     #>
+
+    # Get Applocker policy and XML select the path rules
     $nodes = Get-AppLockerPolicy -Effective -Xml | Select-Xml -XPath "//AppLockerPolicy/RuleCollection/FilePathRule/Conditions/FilePathCondition"
-    $all = $nodes | ForEach-Object {$tmp = $_.Node.Path -replace "%OSDRIVE%",$env:SystemDrive; [System.Environment]::ExpandEnvironmentVariables($tmp)}
-    return $all
+
+    # Replace %OSDRIVE% with the drive the operating system is installed on
+    $paths = $nodes | ForEach-Object {$tmp = $_.Node.Path -replace "%OSDRIVE%",$env:SystemDrive; [System.Environment]::ExpandEnvironmentVariables($tmp)}
+
+    return $paths
 }
 
 function Check-ApplockerFlaws {
