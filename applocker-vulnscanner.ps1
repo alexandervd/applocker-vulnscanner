@@ -62,9 +62,13 @@ function Check-ApplockerFile {
 function Check-ApplockerPath {
     <#
     .SYNOPSIS
-    Check to see if this path rule is vulnerable
+    Writes customized output to a host.
     .DESCRIPTION
-    Check to see if this path rule is vulnerable
+    The Write-Host cmdlet customizes output. You can specify the color of text by using
+    the ForegroundColor parameter, and you can specify the background color by using the
+    BackgroundColor parameter. The Separator parameter lets you specify a string to use to
+    separate displayed objects. The particular result depends on the program that is
+    hosting Windows PowerShell.
     #>
     $paths = "C:\Users\*\AppData\*".split("*")
     $total = ""
@@ -75,10 +79,15 @@ function Check-ApplockerPath {
         Write-Host "Checking ... "$total$i
         $paths = Resolve-Path -Path $total$i
         Foreach ($p in $paths) {
+            # Temporary fix for when resolve-path does not seem to function
+            if (-not $p) {
+                Write-Host "Empty Path (Problem resolving path?)"
+                $p = $total + $i
+            }
             if (Can-Write -Path $p) {
               Write-Host $p
-              Write-Host "I can write to this folder, it's vulnerable"
-              #return $true
+              Write-Host "I can write to this folder/file, it's vulnerable"
+              return $true
             }
         }
         $total = $total + $i + "*"
