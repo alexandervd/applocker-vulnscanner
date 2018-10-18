@@ -48,25 +48,22 @@ function Check-ApplockerPath {
 function Get-ApplockerPaths {
     <#
     .SYNOPSIS
-    Writes customized output to a host.
+    Returns the paths parsed from the path rules in Applocker.
     .DESCRIPTION
-    The Write-Host cmdlet customizes output. You can specify the color of text by using
-    the ForegroundColor parameter, and you can specify the background color by using the
-    BackgroundColor parameter. The Separator parameter lets you specify a string to use to
-    separate displayed objects. The particular result depends on the program that is
-    hosting Windows PowerShell.
+    Returns the paths parsed from the path rules in Applocker.
     #>
+    $nodes = Get-AppLockerPolicy -Effective -Xml | Select-Xml -XPath "//AppLockerPolicy/RuleCollection/FilePathRule/Conditions/FilePathCondition"
+    $all = $nodes | ForEach-Object {$tmp = $_.Node.Path -replace "%OSDRIVE%",$env:SystemDrive; [System.Environment]::ExpandEnvironmentVariables($tmp)}
+    return $all
 }
 
 function Check-ApplockerFlaws {
     <#
     .SYNOPSIS
-    Writes customized output to a host.
+    Check the applocker policy for flaws.
     .DESCRIPTION
-    The Write-Host cmdlet customizes output. You can specify the color of text by using
-    the ForegroundColor parameter, and you can specify the background color by using the
-    BackgroundColor parameter. The Separator parameter lets you specify a string to use to
-    separate displayed objects. The particular result depends on the program that is
-    hosting Windows PowerShell.
+    Check the applocker policy for flaws.
     #>
+    $all = Get-ApplockerPaths
+    Write-Host $all
 }
