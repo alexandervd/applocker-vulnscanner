@@ -6,18 +6,21 @@
     Optional Dependencies: None
 #>
 
-function Can-Write-File {
+function Can-Write {
     <#
     .SYNOPSIS
-    Writes customized output to a host.
+    Check if we can write to this directory or file.
     .DESCRIPTION
-    The Write-Host cmdlet customizes output. You can specify the color of text by using
-    the ForegroundColor parameter, and you can specify the background color by using the
-    BackgroundColor parameter. The Separator parameter lets you specify a string to use to
-    separate displayed objects. The particular result depends on the program that is
-    hosting Windows PowerShell.
+    Check if we can write to this directory or file.
     #>
     param([string]$path = "")
+
+    # If it's a directory, append a testfile
+    if ((Get-Item $path) -is [System.IO.DirectoryInfo]) {
+      $path += "/test.exe"
+    }
+
+    # See if we can open it to write
     Try {
         [io.file]::OpenWrite($path).close()
         return $true
@@ -25,6 +28,7 @@ function Can-Write-File {
     Catch {
         return $false
     }
+
 }
 
 function Check-ApplockerFolder {
@@ -66,6 +70,20 @@ function Check-ApplockerPath {
     separate displayed objects. The particular result depends on the program that is
     hosting Windows PowerShell.
     #>
+    $paths = "C:\Users\*\AppData\*".split("*")
+    $total = ""
+
+    # Recurse through path splits
+    Foreach ($i in $paths) {
+        # Check if writeable
+        Write-Host $total$i
+        if Can-Write -Path $total$i {
+          Write-Host "I can write to this folder, it's vulnerable"
+          return $true
+        }
+        $total = $total + $i
+    }
+    return $false
 }
 
 function Get-ApplockerPaths {
@@ -73,7 +91,7 @@ function Get-ApplockerPaths {
     .SYNOPSIS
     Returns the paths parsed from the path rules in Applocker.
     .DESCRIPTION
-    Returns the paths parsed from the path rules in Applocker. Test commit
+    Returns the paths parsed from the path rules in Applocker.
     #>
 
     # Get Applocker policy and XML select the path rules
@@ -99,3 +117,5 @@ function Check-ApplockerFlaws {
         }
     }
 }
+
+Check-ApplockerFlaws
