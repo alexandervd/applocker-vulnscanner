@@ -62,13 +62,9 @@ function Check-ApplockerFile {
 function Check-ApplockerPath {
     <#
     .SYNOPSIS
-    Writes customized output to a host.
+    Check to see if this path rule is vulnerable
     .DESCRIPTION
-    The Write-Host cmdlet customizes output. You can specify the color of text by using
-    the ForegroundColor parameter, and you can specify the background color by using the
-    BackgroundColor parameter. The Separator parameter lets you specify a string to use to
-    separate displayed objects. The particular result depends on the program that is
-    hosting Windows PowerShell.
+    Check to see if this path rule is vulnerable
     #>
     $paths = "C:\Users\*\AppData\*".split("*")
     $total = ""
@@ -76,12 +72,16 @@ function Check-ApplockerPath {
     # Recurse through path splits
     Foreach ($i in $paths) {
         # Check if writeable
-        Write-Host $total$i
-        if Can-Write -Path $total$i {
-          Write-Host "I can write to this folder, it's vulnerable"
-          return $true
+        Write-Host "Checking ... "$total$i
+        $paths = Resolve-Path -Path $total$i
+        Foreach ($p in $paths) {
+            if (Can-Write -Path $p) {
+              Write-Host $p
+              Write-Host "I can write to this folder, it's vulnerable"
+              #return $true
+            }
         }
-        $total = $total + $i
+        $total = $total + $i + "*"
     }
     return $false
 }
@@ -96,6 +96,9 @@ function Get-ApplockerPaths {
 
     # Get Applocker policy and XML select the path rules
     $nodes = Get-AppLockerPolicy -Effective -Xml | Select-Xml -XPath "//AppLockerPolicy/RuleCollection/FilePathRule/Conditions/FilePathCondition"
+
+    # Get Applocker policy from file
+    #$nodes = Get-Content -Path "C:\applocker.xml" | Select-Xml -XPath "//AppLockerPolicy/RuleCollection/FilePathRule/Conditions/FilePathCondition"
 
     # Replace %OSDRIVE% with the drive the operating system is installed on
     $paths = $nodes | ForEach-Object {$tmp = $_.Node.Path -replace "%OSDRIVE%",$env:SystemDrive; [System.Environment]::ExpandEnvironmentVariables($tmp)}
@@ -119,3 +122,5 @@ function Check-ApplockerFlaws {
 }
 
 Check-ApplockerFlaws
+#$path = "C:\Users\*\AppData\*"
+#Check-ApplockerPath -Path $path
