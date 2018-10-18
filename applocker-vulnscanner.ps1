@@ -93,5 +93,9 @@ function Check-ApplockerFlaws {
     Check the applocker policy for flaws.
     #>
     $all = Get-ApplockerPaths
-    Write-Host $all
+    Foreach ($p in $all){
+        if($p -match "^[a-zA-Z]") {
+          Write-Host $p
+        }
+    }
 }

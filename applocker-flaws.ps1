@@ -129,7 +129,7 @@ $nodes = Get-AppLockerPolicy -Effective -Xml | Select-Xml -XPath "//AppLockerPol
 $all = $nodes | ForEach-Object {$tmp = $_.Node.Path -replace "%OSDRIVE%",$env:SystemDrive; [System.Environment]::ExpandEnvironmentVariables($tmp)}
 
 Foreach ($p in $all){
-    if($p -match "^C") {
+    if($p -match "^[a-zA-Z]") {
         $result = Check-Applockerpath -path $p
         if ($result.count -gt 0) {
             Foreach ($r in $result){
