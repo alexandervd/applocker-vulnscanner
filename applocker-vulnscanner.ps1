@@ -73,7 +73,7 @@ function Get-ApplockerPaths {
     .SYNOPSIS
     Returns the paths parsed from the path rules in Applocker.
     .DESCRIPTION
-    Returns the paths parsed from the path rules in Applocker.
+    Returns the paths parsed from the path rules in Applocker. Test commit
     #>
 
     # Get Applocker policy and XML select the path rules
