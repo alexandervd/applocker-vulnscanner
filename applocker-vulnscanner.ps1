@@ -87,7 +87,7 @@ function Check-ApplockerPath {
             if (Can-Write -Path $p) {
               Write-Host $p
               Write-Host "I can write to this folder/file, it's vulnerable"
-              return $true
+              #return $true
             }
         }
         $total = $total + $i + "*"
